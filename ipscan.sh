@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Convert an IP address to a decimal number
+
 ip_to_decimal() {
     local ip="$1"
     local a b c d
@@ -8,7 +8,7 @@ ip_to_decimal() {
     echo "$((a * 256**3 + b * 256**2 + c * 256 + d))"
 }
 
-# Convert a decimal number back to an IP address
+
 decimal_to_ip() {
     local dec="$1"
     local a=$((dec / 256**3 % 256))
@@ -18,7 +18,7 @@ decimal_to_ip() {
     echo "$a.$b.$c.$d"
 }
 
-# Measure latency for a given IP address
+
 measure_latency() {
     local ip=$1
     local latency=$(ping -c 1 -W 1 "$ip" | grep 'time=' | awk -F'time=' '{ print $2 }' | cut -d' ' -f1)
@@ -28,7 +28,7 @@ measure_latency() {
     printf "%s %s\n" "$ip" "$latency"
 }
 
-# Function to generate all IPs within a CIDR range
+
 generate_ips_in_cidr() {
     local cidr="$1"
     local base_ip=$(echo "$cidr" | cut -d'/' -f1)
@@ -53,7 +53,7 @@ check_and_install() {
     fi
 }
 
-# Check for required packages
+
 check_and_install ping inetutils
 check_and_install awk coreutils
 check_and_install grep grep
@@ -61,7 +61,7 @@ check_and_install cut coreutils
 check_and_install curl curl
 check_and_install bc bc
 
-# IP Ranges to use
+
 IP_RANGES=(
     "104.24.25.0/24" "104.24.26.0/24" "104.24.27.0/24" "104.24.28.0/24"
     "104.24.29.0/24" "104.24.30.0/24" "104.24.31.0/24" "104.24.32.0/24"
@@ -98,7 +98,7 @@ IP_RANGES=(
     "188.244.122.0/24" "190.2.130.0/24" "190.93.244.0/24" "190.93.245.0/24"    "190.93.246.0/24"
 )
 
-# Function to fetch additional IPs if needed
+
 fetch_additional_ips() {
     local needed_ips=$1
     local ip_ranges=("${@:2}")
@@ -114,7 +114,7 @@ fetch_additional_ips() {
     echo "${ips[@]}"
 }
 
-# Function to display a graphical progress bar with green and red colors
+
 show_progress() {
     local current=$1
     local total=$2
@@ -123,35 +123,35 @@ show_progress() {
     local green=$(( progress ))
     local red=$(( 50 - progress ))
 
-    # Print progress bar with green and red colors
+    
     printf "\r["
     printf "\e[42m%${green}s\e[0m" | tr ' ' '='
     printf "\e[41m%${red}s\e[0m" | tr ' ' '='
     printf "] %d%%" "$percent"
 }
 
-# Initial selection and processing
+
 SELECTED_IP_RANGES=($(shuf -e "${IP_RANGES[@]}" -n 10))
 echo "Selected IP Ranges: ${SELECTED_IP_RANGES[@]}"
 
-# Convert IP range to individual IPs and store them
+
 SELECTED_IPS=()
 for range in "${SELECTED_IP_RANGES[@]}"; do
     ips=($(generate_ips_in_cidr "$range"))
     SELECTED_IPS+=("${ips[@]}")
 done
 
-# Randomly select 100 IPs from the combined list
+
 SHUFFLED_IPS=($(shuf -e "${SELECTED_IPS[@]}" -n 100))
 
-# Display results in a formatted table
+
 display_table_ipv4() {
     printf "+-----------------------+------------+\n"
     printf "| IP                    | Latency(ms) |\n"
     printf "+-----------------------+------------+\n"
     echo "$1" | head -n 10 | while read -r ip latency; do
         if [ "$latency" == "N/A" ]; then
-            # If latency is N/A, skip this IP for now
+            
             continue
         fi
         printf "| %-21s | %-10s |\n" "$ip" "$latency"
@@ -159,13 +159,13 @@ display_table_ipv4() {
     printf "+-----------------------+------------+\n"
 }
 
-# Process the IPs and handle cases where latency is N/A
+
 valid_ips=()
 total_ips=${#SHUFFLED_IPS[@]}
 processed_ips=0
 
 while [[ ${#valid_ips[@]} -lt 10 ]]; do
-    # Measure latency and sort results
+    
     ping_results=$(printf "%s\n" "${SHUFFLED_IPS[@]}" | xargs -I {} -P 10 bash -c '
     measure_latency() {
         local ip="$1"
@@ -178,7 +178,7 @@ while [[ ${#valid_ips[@]} -lt 10 ]]; do
     measure_latency "$@"
     ' _ {})
 
-    # Extract valid results
+    
     valid_ips=($(echo "$ping_results" | grep -v "N/A" | awk '{print $1}'))
 
     processed_ips=$((${#valid_ips[@]} + ${#SHUFFLED_IPS[@]} - $total_ips))
@@ -193,7 +193,7 @@ while [[ ${#valid_ips[@]} -lt 10 ]]; do
     fi
 done
 
-# Final progress bar update
+
 clear
 echo -e "\e[1;35m*****************************************"
 echo -e "\e[1;35m*\e[0m \e[1;31mY\e[1;32mO\e[1;33mU\e[1;34mT\e[1;35mU\e[1;36mB\e[1;37mE\e[0m : \e[4;34mKOLANDONE\e[0m         \e[1;35m"
@@ -205,11 +205,11 @@ echo ""
 show_progress $total_ips $total_ips
 echo -e "\n"
 
-# Display the top 10 IPs in a table
+
 echo -e "\e[1;32mDisplaying top 10 IPs with valid latency...\e[0m"
 display_table_ipv4 "$ping_results"
 
-# Display all valid IPs in a comma-separated format
+
 comma_separated_ips=$(IFS=,; echo "${valid_ips[*]}")
 echo -e "\e[1;33mDisplaying all valid IPs:\e[0m"
 echo "$comma_separated_ips"
