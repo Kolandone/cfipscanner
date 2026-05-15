@@ -1,6 +1,13 @@
 
 #!/data/data/com.termux/files/usr/bin/bash
 set -euo pipefail
+echo -e "${cyan}*****************************************${reset}"
+echo -e "${cyan}*${reset} ${red}Y${green}O${yellow}U${purple}T${cyan}U${green}B${white}E${reset} : ${purple}KOLANDONE${reset}         ${cyan}"
+echo -e "${cyan}*${reset} ${red}T${green}E${yellow}L${purple}E${cyan}G${green}R${white}A${red}M${reset} : ${red}NEW TELEGRAM CHANNEL:KOLANDJS1${reset}         ${cyan}"
+echo -e "${cyan}*${reset} ${red}G${green}I${yellow}T${purple}H${cyan}U${green}B${reset} : ${purple}https://github.com/Kolandone${reset} ${cyan}"
+echo -e "${cyan}*****************************************${reset}"
+echo -e "${cyan}* ${green}Date:${reset} $(date '+%Y-%m-%d %H:%M:%S') ${cyan}*${reset}"
+echo ""
 
 if ! command -v python3 &> /dev/null; then
     echo -e "\e[32mPython3 not found. Installing...\e[0m"
